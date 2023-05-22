@@ -22,8 +22,6 @@ const refs = {
 
 console.log(refs.countryInfoEl);
 
-
-
 function getCountry(country) {
   const URL_API = 'https://restcountries.com/v3.1/';
 
@@ -42,26 +40,14 @@ refs.inputSearchEl.addEventListener('input', delay(getInformAboutCountry, DEBOUN
 function getInformAboutCountry(e) {
   let country = e.target.value
   
+
   getCountry(country).
     then(data => {
-      const countryObj = {
-        name: data[0].name.common,
-        capital: data[0].capital[0],
-        flag: data[0].flags.png,
-        population: data[0].population,
-        languages: Object.values(data[0].languages).join(', ')
+      if (data.length <= 1) {
+        createMarkup(data)
+      } else if (data.length < 2 && data.length >= 10) {
+         createMarkupItem(data) 
       }
-      const infoAboutCountry = `
-    <div class="country__wrapper">
-     <img class="flag__img" src="${countryObj.flag}" alt="${countryObj.name} Flag">
-    <h1>${countryObj.name}</h1>
-    </div>
-    <p><b>Capital:</b> ${countryObj.capital}</p>
-    <p><b>Population:</b> ${countryObj.population}</p>
-    <p><b>Languages:</b> ${countryObj.languages}</p>
-
-    `
-        refs.countryInfoEl.innerHTML = infoAboutCountry
     }).
     catch(err => {
       if (country.length > 1) {
@@ -73,3 +59,31 @@ function getInformAboutCountry(e) {
   
 }
 
+function createMarkup(arr) {
+
+  arr.map(({ name: { common }, capital, flags: { png }, population, languages }) => {
+
+  const infoAboutCountry = `
+    <div class="country__wrapper">
+     <img class="flag__img" src="${png}" alt="${common} Flag">
+    <h1>${common}</h1>
+    </div>
+    <p><b>Capital:</b> ${capital}</p>
+    <p><b>Population:</b> ${population}</p>
+    <p><b>Languages:</b> ${Object.values(languages).join(', ')}</p>
+    `
+   return refs.countryInfoEl.innerHTML = infoAboutCountry
+ }) 
+}
+    
+
+function createMarkupItem(arr) {
+  return arr.map(({ name: { common }, capital, flags: { png }, population, languages }) => {
+  `
+    <li class="country__wrapper">
+     <img class="flag__img" src="${png}" alt="${common} Flag">
+    <h1>${common}</h1>
+    </li>
+    `
+  }).join('')
+    }
