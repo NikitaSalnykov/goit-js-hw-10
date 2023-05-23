@@ -26,7 +26,7 @@ const refs = {
 refs.inputSearchEl.addEventListener('input', delay(getInformAboutCountry, DEBOUNCE_DELAY));
 
 function getInformAboutCountry(e) {
-  let country = trim(e.target.value)
+  let country = e.target.value.trim()
   refs.countryInfoEl.innerHTML = ''
   refs.countryListEl.innerHTML = ''
 
@@ -39,14 +39,11 @@ function getInformAboutCountry(e) {
 
       } else if (data.length > 10){
         Notiflix.Notify.info('Too many matches found. Please enter a more specific name');
-      }
+      } 
     }).
     catch(err => {
-      if (data.length > 0) {
-     Notiflix.Notify.warning('Ooops, no such country found');
-      refs.countryInfoEl.innerHTML = ''
-      console.log(err)
-     }
+       Notiflix.Notify.warning('Ooops, no such country found');
+    refs.countryInfoEl.innerHTML = ''
     })
   
 }
