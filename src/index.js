@@ -1,5 +1,7 @@
 import './css/styles.css';
 import Notiflix from 'notiflix';
+import { trim } from 'lodash';
+import getCountry from './api-countries.js'
 
 Notiflix.Notify.init({
   width: '280px',
@@ -20,41 +22,31 @@ const refs = {
   countryInfoEl: document.querySelector('.country-info'), 
 }
 
-console.log(refs.countryInfoEl);
-
-function getCountry(country) {
-  const URL_API = 'https://restcountries.com/v3.1/';
-
- return fetch(`${URL_API}name/${country}`).
-    then(resp => {
-      if (!resp.ok) {
-      throw new Error(resp.statusText) 
-      }
-        return resp.json()
-     })
-}
-
 
 refs.inputSearchEl.addEventListener('input', delay(getInformAboutCountry, DEBOUNCE_DELAY));
 
 function getInformAboutCountry(e) {
-  let country = e.target.value
-  
+  let country = trim(e.target.value)
+  refs.countryInfoEl.innerHTML = ''
+  refs.countryListEl.innerHTML = ''
 
   getCountry(country).
     then(data => {
-      if (data.length <= 1) {
-        createMarkup(data)
-      } else if (data.length < 2 && data.length >= 10) {
-         createMarkupItem(data) 
+      if (data.length === 1) {
+        createMarkup(data);
+      } else if (data.length > 1 && data.length <= 10) {
+        refs.countryListEl.insertAdjacentHTML('beforeEnd', createMarkupItem(data)) 
+
+      } else if (data.length > 10){
+        Notiflix.Notify.info('Too many matches found. Please enter a more specific name');
       }
     }).
     catch(err => {
-      if (country.length > 1) {
-      Notiflix.Notify.warning('Ooops, no such country found');
-      } 
+      if (data.length > 0) {
+     Notiflix.Notify.warning('Ooops, no such country found');
       refs.countryInfoEl.innerHTML = ''
       console.log(err)
+     }
     })
   
 }
@@ -78,12 +70,12 @@ function createMarkup(arr) {
     
 
 function createMarkupItem(arr) {
-  return arr.map(({ name: { common }, capital, flags: { png }, population, languages }) => {
-  `
+  return arr.map(({ name: { common }, flags: { png }, }) => 
+   `
     <li class="country__wrapper">
-     <img class="flag__img" src="${png}" alt="${common} Flag">
-    <h1>${common}</h1>
+     <img class="flags__img" src="${png}" alt="${common} Flag">
+    <h2>${common}</h2>
     </li>
     `
-  }).join('')
+  ).join('')
     }
